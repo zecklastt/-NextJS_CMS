@@ -5,7 +5,6 @@ import { cmsService } from '../../infra/cms/cmsService';
 import { Box, Text, theme } from '../../theme/components';
 import { renderNodeRule, StructuredText } from 'react-datocms';
 import { isHeading } from 'datocms-structured-text-utils'
-import { Children } from 'react';
 
 
 export async function getStaticPaths() {
@@ -35,10 +34,10 @@ export async function getStaticProps({ params }) {
   const { data } = await cmsService({
     query: contentQuery
   });
-  console.log("Dados do CMS", data);
 
   return {
     props: {
+      cmsContent: data,
       id,
       title: data.contentFaqQuestion.titl,
       content: data.contentFaqQuestion.content,
@@ -46,7 +45,9 @@ export async function getStaticProps({ params }) {
   }
 }
 
-export default function FAQQuestionScreen({ title, content }) {
+export default function FAQQuestionScreen({ cmsContent }) {
+  console.log("Dados do CMS", cmsContent);
+
   return (
     <>
       <Head>
@@ -75,11 +76,11 @@ export default function FAQQuestionScreen({ title, content }) {
           }}
         >
           <Text tag="h1" variant="heading1">
-            {title}
+            {cmsContent.contentFaqQuestion.titl}
           </Text>
 
           <StructuredText
-            data={content}
+            data={cmsContent.contentFaqQuestion.content}
             customNodeRules={[
               renderNodeRule(isHeading, ({ node, children, key }) => {
                 const tag = `h${node.level}`;
@@ -102,7 +103,7 @@ export default function FAQQuestionScreen({ title, content }) {
         </Box>
       </Box>
 
-      <Footer />
+      <Footer description={cmsContent.globalContent.globalFooter.description} />
     </>
   )
 }
