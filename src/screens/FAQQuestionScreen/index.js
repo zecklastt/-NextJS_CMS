@@ -1,11 +1,10 @@
 import Head from 'next/head';
 import { Footer } from '../../components/commons/Footer';
 import { Menu } from '../../components/commons/Menu';
-import { cmsService } from '../../infra/cms/cmsService';
 import { Box, Text, theme } from '../../theme/components';
+import { cmsService } from '../../infra/cms/cmsService';
 import { renderNodeRule, StructuredText } from 'react-datocms';
-import { isHeading } from 'datocms-structured-text-utils'
-import CMSProvider from '../../infra/cms/cmsProvider';
+import { isHeading } from 'datocms-structured-text-utils';
 
 
 export async function getStaticPaths() {
@@ -20,16 +19,15 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({ params, preview }) {
   const { id } = params;
-
   const contentQuery = `
-  query {
-    contentFaqQuestion {
-      titl
-      content {
-        value
+    query {
+      contentFaqQuestion {
+        title
+        content {
+          value
+        }
       }
     }
-  }
   `;
 
   const { data } = await cmsService({
@@ -41,17 +39,15 @@ export async function getStaticProps({ params, preview }) {
     props: {
       cmsContent: data,
       id,
-      title: data.contentFaqQuestion.titl,
+      title: data.contentFaqQuestion.title,
       content: data.contentFaqQuestion.content,
     }
   }
 }
 
 export default function FAQQuestionScreen({ cmsContent }) {
-  console.log("Dados do CMS", cmsContent);
-
   return (
-    <CMSProvider cmsContent={cmsContent} >
+    <>
       <Head>
         <title>FAQ - Alura</title>
       </Head>
@@ -69,8 +65,6 @@ export default function FAQQuestionScreen({ cmsContent }) {
       >
         <Box
           styleSheet={{
-            display: 'flex',
-            gap: theme.space.x4,
             flexDirection: 'column',
             width: '100%',
             maxWidth: theme.space.xcontainer_lg,
@@ -78,7 +72,7 @@ export default function FAQQuestionScreen({ cmsContent }) {
           }}
         >
           <Text tag="h1" variant="heading1">
-            {cmsContent.contentFaqQuestion.titl}
+            {cmsContent.contentFaqQuestion.title}
           </Text>
 
           <StructuredText
@@ -86,7 +80,7 @@ export default function FAQQuestionScreen({ cmsContent }) {
             customNodeRules={[
               renderNodeRule(isHeading, ({ node, children, key }) => {
                 const tag = `h${node.level}`;
-                const variant = `heading${node.level}`
+                const variant = `heading${node.level}`;
                 return (
                   <Text tag={tag} variant={variant} key={key}>
                     {children}
@@ -95,17 +89,14 @@ export default function FAQQuestionScreen({ cmsContent }) {
               })
             ]}
           />
-
           {/* <pre>
             {JSON.stringify(content, null, 4)}
           </pre> */}
-
           {/* <Box dangerouslySetInnerHTML={{ __html: content }} /> */}
-
         </Box>
       </Box>
 
-      <Footer />
-    </CMSProvider>
+      <Footer description={cmsContent.globalContent.globalFooter.description} />
+    </>
   )
 }
